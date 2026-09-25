@@ -74,3 +74,28 @@ Stage Summary:
 - SECURITY RISK: user's GitHub token was shared in chat — advise rotating it immediately (Settings → Developer settings → Tokens).
 - Known limits: crawler is same-origin only, max 25 pages, no JS rendering (CSR-only sites will show thin content); AI actions cost SDK tokens; DataForSEO-backed features (rank tracking, backlinks) remain out of scope for now.
 - Next-phase ideas: schedule recurring audits + email diffs, sitemap.xml/llms.txt one-click generator endpoints, WordPress/HTML export of fixes, integrate OpenSEO MCP tools for keyword/backlink data.
+
+---
+
+Task ID: 5 (user report: unrealistic scores)
+Agent: Z.ai Code (main)
+Task: User reported seo-silk-seven.vercel.app shows 91% despite having "0 SEO" — make scoring realistic & real-time; update GitHub; provide Vercel .env.
+
+Work Log:
+- Root-caused inflation: (a) severity weights too soft (12/5/1.5), (b) penalty damping `penalty / sqrt(pageCount)` raised small-site scores, (c) category-key mismatch — issues tagged "structured-data"/"ai-readiness" never matched score keys "structured"/"aiReadiness", so those penalties were silently ignored (always 100), (d) missing checks for the user's actual defects.
+- User's site inspected: it is a Vercel deployment of this same app — real defects found: og:url → https://chat.z.ai (cross-domain!), no canonical, no sitemap.xml (404), robots.txt without Sitemap line, no JSON-LD, no og:image, no favicon.ico, thin server-rendered text (60 words).
+- issue-registry: weights → critical 22 / warning 9 / info 3; +7 new issues (og-url-mismatch, og-image-broken, twitter-image-missing, canonical-cross-domain, x-robots-noindex, js-only-content, favicon-link-missing) → 58 total. Deduped a double-applied MultiEdit.
+- crawler: captures og:url/og:image/twitter:image absolutes, favicon <link>, scriptCount (counted before DOM strip — bug), X-Robots-Tag header; added checkImageUrl() live og:image validation.
+- audit-engine: strict scoring v2 — full-weight penalties (same issueId charged max 3×), category-key mapping fixed, hard caps (noindex→25, missing home title→50, missing desc/viewport/js-only→55, missing h1→80, http→45, unique criticals ≥2/≥4/≥7 → 70/55/40), grade bands A+≥95 A≥88 B≥78 C≥65 D≥50 E≥35 F<35; og:image validated on homepage.
+- API: revalidate=0 + no-store (every audit is a fresh live crawl); DB history write wrapped in try/catch so audits succeed even with ephemeral DB (Vercel /tmp SQLite).
+- Vercel-readiness: scripts/write-zai-config.mjs writes .z-ai-config at build from ZAI_CONFIG_JSON or ZAI_BASE_URL+ZAI_API_KEY (SDK only reads the file, not env); next.config outputFileTracingIncludes ships it into the bundle; .env.example added; build script hooks the writer.
+- UI: "Live crawl · strict model v2" pulse badge in results hero; copy updated to 58 strict checks everywhere (form, how-it-works, helpers); issue-help entries for all 7 new issues; fixed lint error in useRotatingMessage.
+- Verification: seo-silk-seven.vercel.app → 70/C via engine, direct API and UI (was 91/A); zero-SEO JS-only local fixture → 45/E (5 criticals incl. js-only-content); tsc clean; lint clean (only vendored open-seo/ has pre-existing issues); agent-browser: audit ran end-to-end, badge renders, flex-wrap OK, zero console errors.
+- Git: 2 commits as faisukhan01 <193670919+faisukhan01@users.noreply.github.com> — 4d06790 (strict scoring v2), 1b8bae8 (Vercel env handling) — pushed to faisukhan01/seo main.
+
+Stage Summary:
+- Scores are now honest: user's site 70/C with 2 criticals (og:url cross-domain, missing sitemap) — each finding actionable and real.
+- Vercel .env needed: DATABASE_URL="file:/tmp/seo-autopilot.db" (audit works regardless; history ephemeral) + ZAI_CONFIG_JSON={"baseUrl":"https://api.z.ai/api/paas/v4","apiKey":"sk-..."} for AI features (optional). See .env.example.
+- Vercel deploy: after this push the project redeploys automatically (if Git integration is on); env vars must be added in Vercel → Settings → Environment Variables, then redeploy.
+- Risk: token shared in chat again — rotation strongly advised. Score history on Vercel stays ephemeral until Prisma moves to Turso/Postgres.
+- Next-phase ideas: one-click "fix pack" export (robots.txt/sitemap.ts/metadata) per site; scheduled re-audits with score diff alerts; Contentful/WordPress export.
