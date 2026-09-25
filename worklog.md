@@ -49,3 +49,28 @@ Stage Summary:
 - Full single-page SEO Autopilot dashboard shipped (4 tabs: Audit, AI Fixes, History, How it works) on Next.js 16 App Router + TS + Tailwind 4 + shadcn/ui, emerald/teal accent system, dark-mode friendly tokens, framer-motion transitions, mobile-first responsive, 44px touch targets, thin-scrollbar long lists, no emojis (Lucide only).
 - Files created: src/components/seo/{issue-help.ts, helpers.ts, snippets.tsx, score-ring.tsx, audit-form.tsx, results-view.tsx, ai-tab.tsx, history-tab.tsx, how-it-works-tab.tsx}; src/app/page.tsx rewritten; src/app/layout.tsx metadata updated. No changes to src/lib/**, src/app/api/**, prisma/**.
 - Verification: bunx tsc --noEmit → 0 errors; GET / → 200 with new <title>; GET /api/seo/audits → 200; dev.log clean (no runtime errors); real audit API intentionally not exercised (left for QA per instructions); error flow validated with an invalid target only.
+
+---
+
+Task ID: 2 (research + build)
+Agent: Z.ai Code (main) + frontend-styling-expert (Task 3 UI)
+Task: Build "SEO Autopilot" — a 100%-SEO engine for any website (user request: extend OpenSEO principles so a tool can audit AND fix any website they build), then push everything to the user's GitHub (faisukhan01).
+
+Work Log:
+- Deep research: inspected user's GitHub (token verified as faisukhan01, id 193670919; faisukhan01/seo was empty), studied OpenSEO's audit-issues.ts registry (28 issue types) and audit-fetch architecture; loaded LLM skill for z-ai-web-dev-sdk usage.
+- Decision: rather than modifying the Cloudflare-specific OpenSEO codebase (pnpm + workerd + D1 not viable in this sandbox), built a standalone Next.js "SEO Autopilot" on the port-3000 app, modeled on OpenSEO's registry and expanded.
+- Prisma: added SeoAudit model (scores, issue counts, JSON result, domain index); db:push OK.
+- Backend (src/lib/seo/*): types.ts contract; issue-registry.ts with 48 issues across 7 categories (technical/content/social/structured-data/mobile/performance/ai-readiness); crawler.ts (BFS, manual redirect-chain following, bot-block detection, mixed-content scan, robots/sitemap/llms.txt/favicon checks, broken-link HEAD checks, content fingerprints); audit-engine.ts (48 checks, severity-weighted scoring with page-count damping, A+..F grades); ai.ts (6 z-ai LLM actions: meta, keywords, brief, schema, summary, nextjs fixes); report.ts (markdown generator).
+- APIs: POST /api/seo/audit, GET /api/seo/audits, GET /api/seo/audits/[id] (with domain history), POST /api/seo/ai, GET /api/seo/report/[id]. All force-dynamic.
+- Frontend (Task 3, frontend-styling-expert): 4-tab dashboard (Audit / AI Fixes / History / How it works), animated SVG score ring, 7 category cards, filterable issues accordion with client-side 51-issue knowledge base, 6 AI action cards with per-audit cache + copy buttons, recharts history chart, markdown report download, dark mode, sticky footer, emerald accent, framer-motion.
+- tsconfig: excluded open-seo/, examples/, mini-services/, skills/ so tsc is clean.
+- QA (agent-browser): page 200; real audit via UI on example.com → 90/A with all 7 categories + 13 issues rendered; AI Schema + Executive Summary actions generated and rendered in-UI; History table + row-click loading works; zero console errors; desktop (1280px) + mobile (390px) screenshots verified clean. Bonus: an audit of punjabdentalsurgery.vercel.app (user's own site) scored 91/A.
+- Git: author configured as faisukhan01 <193670919+faisukhan01@users.noreply.github.com> so commits count on the user's contribution graph. 2 commits: backend (6004af8), frontend+README (97b0544).
+- GitHub push: /home/z/my-project → faisukhan01/seo (main, new branch); /home/z/my-project/open-seo full clone with history → faisukhan01/open-seo (created via API, main pushed, HEAD 0ffff93). Token removed from all git remotes; no token found in tracked files (rg check).
+
+Stage Summary:
+- LIVE: SEO Autopilot at port 3000 (preview panel) — run an audit of any public site, generate AI fixes, download reports.
+- GitHub: https://github.com/faisukhan01/seo (the tool) + https://github.com/faisukhan01/open-seo (full OpenSEO clone with history).
+- SECURITY RISK: user's GitHub token was shared in chat — advise rotating it immediately (Settings → Developer settings → Tokens).
+- Known limits: crawler is same-origin only, max 25 pages, no JS rendering (CSR-only sites will show thin content); AI actions cost SDK tokens; DataForSEO-backed features (rank tracking, backlinks) remain out of scope for now.
+- Next-phase ideas: schedule recurring audits + email diffs, sitemap.xml/llms.txt one-click generator endpoints, WordPress/HTML export of fixes, integrate OpenSEO MCP tools for keyword/backlink data.
