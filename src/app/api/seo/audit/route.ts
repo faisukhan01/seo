@@ -4,6 +4,7 @@ import { runAudit } from "@/lib/seo/audit-engine";
 import type { AuditRequest, SiteAuditResult } from "@/lib/seo/types";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export const maxDuration = 120;
 
 function normalizeStartUrl(raw: string): string | null {
@@ -55,7 +56,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ id: record.id, result });
+    return NextResponse.json(
+      { id: record.id, result },
+      { headers: { "Cache-Control": "no-store, max-age=0" } },
+    );
   } catch (err) {
     console.error("audit failed:", err);
     return NextResponse.json(

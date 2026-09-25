@@ -239,6 +239,48 @@ export const ISSUE_HELP: Record<string, IssueHelp> = {
     howToFix:
       "Add twitter:card=summary_large_image plus twitter:title, twitter:description and twitter:image tags.",
   },
+  "og-url-mismatch": {
+    explanation:
+      "og:url points to a different domain than this page. Social platforms consolidate previews and share counts onto that foreign URL, so this page loses attribution and preview control.",
+    howToFix:
+      "Set og:url to the absolute URL of the current page (same origin). In Next.js, set metadataBase in the metadata config and let og:url be generated from the real canonical URL.",
+  },
+  "og-image-broken": {
+    explanation:
+      "The og:image URL is present but did not return a valid image (error status or wrong content type), so social platforms render a blank or text-only card.",
+    howToFix:
+      "Make sure the og:image URL is absolute and publicly reachable, returns HTTP 200 with an image/* content type, and is roughly 1200×630px.",
+  },
+  "twitter-image-missing": {
+    explanation:
+      "There is a twitter:card but no twitter:image and no og:image fallback, so X/Twitter shows a plain text preview.",
+    howToFix:
+      'Add <meta name="twitter:image" content="absolute image URL"> (or a valid og:image, which X falls back to).',
+  },
+  "canonical-cross-domain": {
+    explanation:
+      "The rel=canonical of this page resolves to a different domain — effectively telling search engines to index the other site instead of yours. This alone can make a page invisible in search.",
+    howToFix:
+      "Point canonical at the same-origin absolute URL of the page. Look for leftover template placeholders or a wrong metadataBase in your framework config.",
+  },
+  "x-robots-noindex": {
+    explanation:
+      "The HTTP response includes an X-Robots-Tag: noindex header, which forbids indexing no matter how good the page content is.",
+    howToFix:
+      "Remove the noindex directive from your middleware, hosting/CDN header rules or platform settings for pages that should rank.",
+  },
+  "favicon-link-missing": {
+    explanation:
+      "The HTML head does not declare a favicon via <link rel=\"icon\">. Browsers and mobile search results may show a generic icon instead of your brand.",
+    howToFix:
+      'Add <link rel="icon" href="/favicon.ico" sizes="any"> plus apple-touch-icon and a manifest icon in the <head>.',
+  },
+  "js-only-content": {
+    explanation:
+      "Almost no readable text is present in the raw HTML (< 60 words) while the page ships many scripts. Crawlers that don't execute JavaScript — and most AI answer engines — see an empty page. This is the most common reason a modern site has 'zero SEO' despite looking fine in a browser.",
+    howToFix:
+      "Server-render the primary content (Next.js SSR/SSG, prerendering, or static HTML) so title, headings and body text exist in the initial HTML response.",
+  },
   // ── structured data ──────────────────────────────────────────────────
   "no-json-ld": {
     explanation:

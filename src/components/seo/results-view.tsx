@@ -221,6 +221,17 @@ export function ResultsView({
               >
                 {scores.grade}
               </Badge>
+              <Badge
+                variant="outline"
+                className="gap-1.5 border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400"
+                aria-label="This audit was crawled live, just now"
+              >
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                </span>
+                Live crawl · strict model v2
+              </Badge>
               <h2 className="truncate text-xl font-semibold tracking-tight">
                 {domain}
               </h2>

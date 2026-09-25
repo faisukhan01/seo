@@ -15,6 +15,7 @@ export interface RawPage {
   responseTimeMs: number;
   bytes: number;
   contentType: string;
+  xRobotsTag?: string; // raw X-Robots-Tag response header
   html?: string;
   depth: number; // BFS link distance from start URL
   blocked: boolean;
@@ -117,6 +118,7 @@ export async function fetchPage(url: string, depth: number): Promise<RawPage> {
       responseTimeMs,
       bytes: buf.length,
       contentType,
+      xRobotsTag: res.headers.get("x-robots-tag") ?? undefined,
       html:
         contentType.includes("html") && !blocked
           ? buf.subarray(0, 1_500_000).toString("utf8")
@@ -159,10 +161,37 @@ async function checkLink(url: string): Promise<number> {
   }
 }
 
+/**
+ * Validates that a URL is publicly reachable and actually an image.
+ * Used to verify og:image / twitter:image URLs really resolve.
+ */
+export async function checkImageUrl(url: string): Promise<{ ok: boolean; status: number; contentType: string }> {
+  try {
+    let res = await fetchWithTimeout(url, { method: "HEAD" });
+    if (res.status === 405 || res.status === 501 || res.status >= 400) {
+      // some servers reject HEAD — retry with GET (drain the body)
+      res = await fetchWithTimeout(url);
+      try {
+        await res.arrayBuffer();
+      } catch {
+        /* ignore */
+      }
+    }
+    const ct = res.headers.get("content-type") ?? "";
+    const ok = res.status >= 200 && res.status < 300 && (ct.startsWith("image/") || ct === "");
+    return { ok, status: res.status, contentType: ct };
+  } catch {
+    return { ok: false, status: 0, contentType: "" };
+  }
+}
+
 export function parsePageHtml(page: RawPage): PageAudit {
   const html = page.html ?? "";
   const $ = cheerio.load(html);
   const baseUrl = page.finalUrl;
+
+  // count scripts BEFORE they are stripped from the DOM below
+  const scriptCount = $("script").length;
 
   const title = $("head title").first().text().trim() || undefined;
   const metaDescription =
@@ -214,8 +243,12 @@ export function parsePageHtml(page: RawPage): PageAudit {
   ).length;
   const hasOpenGraph = ogFound >= 2;
   const hasOgImage = $('meta[property="og:image"]').length > 0;
+  const ogUrlRaw = $('meta[property="og:url"]').attr("content")?.trim();
+  const ogImageUrlRaw = $('meta[property="og:image"]').first().attr("content")?.trim();
+  const twitterImageRaw = $('meta[name="twitter:image"]').attr("content")?.trim();
   const hasTwitterCard = $('meta[name^="twitter:"]').length > 0;
   const hasViewport = $('meta[name="viewport"]').length > 0;
+  const hasFaviconLink = $("link[rel~='icon'], link[rel='apple-touch-icon'], link[rel='shortcut icon']").length > 0;
   const lang = $("html").attr("lang") || undefined;
   const charset =
     $("meta[charset]").attr("charset") ||
@@ -249,6 +282,7 @@ export function parsePageHtml(page: RawPage): PageAudit {
       responseTimeMs: page.responseTimeMs,
       bytes: page.bytes,
       contentType: page.contentType,
+      xRobotsTag: page.xRobotsTag,
     },
     title,
     titleLength: title?.length ?? 0,
@@ -266,7 +300,12 @@ export function parsePageHtml(page: RawPage): PageAudit {
     imagesMissingAlt,
     hasOpenGraph,
     hasOgImage,
+    ogUrl: ogUrlRaw ? normalizeUrl(ogUrlRaw, baseUrl) ?? ogUrlRaw : undefined,
+    ogImageUrl: ogImageUrlRaw ? normalizeUrl(ogImageUrlRaw, baseUrl) ?? ogImageUrlRaw : undefined,
+    twitterImageUrl: twitterImageRaw ? normalizeUrl(twitterImageRaw, baseUrl) ?? twitterImageRaw : undefined,
     hasTwitterCard,
+    hasFaviconLink,
+    scriptCount,
     hasViewport,
     lang,
     charset,

@@ -40,6 +40,7 @@ export interface PageMeta {
   responseTimeMs: number;
   bytes: number;
   contentType: string;
+  xRobotsTag?: string; // value of the X-Robots-Tag response header
 }
 
 export interface PageAudit {
@@ -60,7 +61,12 @@ export interface PageAudit {
   imagesMissingAlt: number;
   hasOpenGraph: boolean;
   hasOgImage: boolean;
+  ogUrl?: string; // absolute og:url value
+  ogImageUrl?: string; // absolute og:image value
+  twitterImageUrl?: string; // absolute twitter:image value
   hasTwitterCard: boolean;
+  hasFaviconLink: boolean; // <link rel="icon"> present in head
+  scriptCount: number; // number of <script> tags (JS-only detection)
   hasViewport: boolean;
   lang?: string;
   charset?: string;
@@ -119,7 +125,7 @@ export interface ScoreSummary {
 }
 
 export interface SiteAuditResult {
-  version: 1;
+  version: 2; // v2 = strict scoring model (hard caps, realistic weights)
   startUrl: string;
   domain: string;
   crawledAt: string; // ISO

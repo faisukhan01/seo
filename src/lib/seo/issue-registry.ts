@@ -86,6 +86,36 @@ const ISSUE_LIST: IssueDescriptor[] = [
         "If this page should rank, make its canonical self-referencing; otherwise remove it from internal links and the sitemap.",
     },
     {
+      id: "canonical-cross-domain",
+      severity: "critical",
+      category: "technical",
+      title: "Canonical points to a different domain",
+      explanation:
+        "The rel=canonical of this page resolves to another domain, which effectively tells search engines to drop this page from the index and give all credit to the other site.",
+      howToFix:
+        "Point canonical at the same-origin absolute URL of the page. Check for leftover template placeholders (e.g. og:url from a scaffold) or wrong metadataBase.",
+    },
+    {
+      id: "x-robots-noindex",
+      severity: "critical",
+      category: "technical",
+      title: "X-Robots-Tag header blocks indexing",
+      explanation:
+        "The HTTP response includes an X-Robots-Tag: noindex header, so the page can never appear in search results — even with perfect on-page SEO.",
+      howToFix:
+        "Remove the noindex X-Robots-Tag header (check middleware, hosting platform headers or CDN rules) for pages that should rank.",
+    },
+    {
+      id: "favicon-link-missing",
+      severity: "info",
+      category: "technical",
+      title: "No favicon <link> in HTML",
+      explanation:
+        "The HTML head does not declare a favicon via <link rel=\"icon\">. Browsers and search engines may fall back to a generic icon, hurting brand recognition in tabs and mobile SERPs.",
+      howToFix:
+        "Add <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"any\"> (plus apple-touch-icon and a web manifest icon) to the <head>.",
+    },
+    {
       id: "missing-canonical",
       severity: "info",
       category: "technical",
@@ -322,6 +352,16 @@ const ISSUE_LIST: IssueDescriptor[] = [
       howToFix: "Reduce boilerplate markup, inline scripts and hidden text; let real content dominate the HTML.",
     },
     {
+      id: "js-only-content",
+      severity: "critical",
+      category: "content",
+      title: "Content only renders via JavaScript",
+      explanation:
+        "The server returns almost no readable HTML text (< 60 words) while shipping many script files. Crawlers that do not execute JavaScript (and most AI answer engines) see an empty page — this is the most common reason a modern site silently has 'zero SEO'.",
+      howToFix:
+        "Server-render the primary content (Next.js SSR/SSG, prerendering, or static HTML) so the title, headings and body text exist in the raw HTML response.",
+    },
+    {
       id: "images-missing-alt",
       severity: "warning",
       category: "content",
@@ -357,6 +397,35 @@ const ISSUE_LIST: IssueDescriptor[] = [
       title: "Twitter Card tags missing",
       explanation: "Without twitter:card, X/Twitter renders a small, plain link preview instead of a large summary card.",
       howToFix: "Add twitter:card=summary_large_image plus twitter:title/description/image.",
+    },
+    {
+      id: "og-url-mismatch",
+      severity: "critical",
+      category: "social",
+      title: "og:url points to a different domain",
+      explanation:
+        "The og:url tag points to another domain than the page itself. Social platforms consolidate share counts and preview data onto that foreign URL, so your pages lose attribution, preview control and social proof.",
+      howToFix:
+        "Set og:url to the absolute, canonical URL of the current page (same origin). In Next.js set metadataBase and use alternates.canonical so og:url is generated correctly.",
+    },
+    {
+      id: "og-image-broken",
+      severity: "warning",
+      category: "social",
+      title: "og:image is broken or unreachable",
+      explanation:
+        "The og:image URL exists in the markup but returned an error or non-image response. Social platforms will render a blank or text-only card.",
+      howToFix:
+        "Make sure the og:image URL is absolute, publicly reachable (no auth), returns HTTP 200 with an image/* content type, and is ~1200x630px.",
+    },
+    {
+      id: "twitter-image-missing",
+      severity: "info",
+      category: "social",
+      title: "twitter:image missing",
+      explanation:
+        "X/Twitter falls back to og:image in most cases, but an explicit twitter:image guarantees a large, correct preview card.",
+      howToFix: "Add <meta name=\"twitter:image\" content=\"absolute image URL\"> alongside twitter:card.",
     },
 
     // ── structured data ──────────────────────────────────────────────────
@@ -502,8 +571,11 @@ export const CATEGORY_LABELS: Record<string, string> = {
   "ai-readiness": "AI Search Readiness",
 };
 
+// Strict, realistic weights (model v2). A single critical failure on a page
+// should visibly move the needle — a missing sitemap or noindex page must not
+// be drowned out by an otherwise clean template.
 export const SEVERITY_WEIGHTS: Record<string, number> = {
-  critical: 12,
-  warning: 5,
-  info: 1.5,
+  critical: 22,
+  warning: 9,
+  info: 3,
 };

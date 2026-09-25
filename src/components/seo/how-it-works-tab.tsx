@@ -27,13 +27,13 @@ const STEPS: { icon: LucideIcon; title: string; body: string }[] = [
   },
   {
     icon: ListChecks,
-    title: "48 checks",
-    body: "Each page is checked against 48 SEO checkpoints across 7 categories: indexability, canonicals, titles, descriptions, headings, content depth, Open Graph, JSON-LD, mobile basics, performance and AI-readiness.",
+    title: "58 strict checks",
+    body: "Each page is checked against 58 SEO checkpoints across 7 categories: indexability, canonicals (including cross-domain mistakes), titles, descriptions, headings, content depth, JS-only rendering, Open Graph (og:url and og:image are validated live), JSON-LD, mobile basics, performance and AI-readiness.",
   },
   {
     icon: Gauge,
-    title: "Score",
-    body: "Findings are weighted (critical > warning > info) and rolled up into an overall 0-100 score, a letter grade, and a per-category breakdown so you know exactly where to start.",
+    title: "Strict, honest score",
+    body: "Findings cost their full weight (critical 22 / warning 9 / info 3) and hard caps apply: a missing title, a noindex page or multiple critical failures limit the score no matter how clean the rest looks. A site with real problems gets a real number.",
   },
   {
     icon: Wand2,
@@ -43,9 +43,9 @@ const STEPS: { icon: LucideIcon; title: string; body: string }[] = [
 ];
 
 const COVERAGE: { icon: LucideIcon; label: string; body: string }[] = [
-  { icon: Globe, label: "Technical SEO", body: "Sitemaps, robots.txt, redirects, canonicals, orphans, HTTPS, broken links." },
-  { icon: FileText, label: "Content & On-Page", body: "Titles, meta descriptions, H1s, heading order, thin content, alt text." },
-  { icon: Share2, label: "Social / Open Graph", body: "og:title, og:description, og:image and Twitter card coverage." },
+  { icon: Globe, label: "Technical SEO", body: "Sitemaps, robots.txt, redirects, canonicals (incl. cross-domain), orphans, HTTPS, broken links." },
+  { icon: FileText, label: "Content & On-Page", body: "Titles, meta descriptions, H1s, heading order, thin content, JS-only rendering, alt text." },
+  { icon: Share2, label: "Social / Open Graph", body: "og:url domain check, live og:image validation, Twitter card and twitter:image coverage." },
   { icon: Braces, label: "Structured Data", body: "JSON-LD presence and validity, breadcrumb markup, rich-result readiness." },
   { icon: Smartphone, label: "Mobile & Trust", body: "Viewport, lang attribute, charset, mixed content." },
   { icon: Gauge, label: "Performance", body: "Server response time, HTML size, DOM node count, text ratio." },

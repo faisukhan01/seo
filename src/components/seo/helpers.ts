@@ -119,7 +119,7 @@ export const AUDIT_STATUS_MESSAGES = [
   "Crawling pages…",
   "Analyzing meta tags…",
   "Checking structured data…",
-  "Scoring 48 checkpoints…",
+  "Scoring 58 strict checkpoints…",
 ];
 
 export function useRotatingMessage(messages: string[], active: boolean, intervalMs = 2000) {
@@ -127,10 +127,10 @@ export function useRotatingMessage(messages: string[], active: boolean, interval
 
   useEffect(() => {
     if (!active) {
-      setIndex(0);
-      return;
+      // reset without synchronous setState inside the effect body
+      const id = setTimeout(() => setIndex(0), 0);
+      return () => clearTimeout(id);
     }
-    setIndex(0);
     const id = setInterval(() => {
       setIndex((i) => (i + 1) % messages.length);
     }, intervalMs);

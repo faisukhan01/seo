@@ -71,7 +71,7 @@ export function AuditForm({
           Run a free SEO audit
         </CardTitle>
         <CardDescription className="max-w-md text-balance">
-          Crawl any public website and get a 48-check audit with scores,
+          Crawl any public website and get a strict 58-check audit with scores,
           prioritized issues and AI-generated fixes. Takes 10–60 seconds.
         </CardDescription>
       </CardHeader>
