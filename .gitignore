@@ -52,3 +52,10 @@ prompt
 server.log
 # Skills directory
 /skills/
+# cloned repos & local artifacts
+/open-seo/
+/db/
+*.db
+*.db-journal
+agent-ctx
+worklog.md
