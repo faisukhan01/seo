@@ -34,30 +34,39 @@ export async function POST(req: NextRequest) {
 
     const result: SiteAuditResult = await runAudit(startUrl, maxPages);
 
-    const record = await db.seoAudit.create({
-      data: {
-        domain: result.domain,
-        startUrl: result.startUrl,
-        overallScore: result.scores.overall,
-        grade: result.scores.grade,
-        technicalScore: result.scores.categories.find((c) => c.key === "technical")?.score ?? 0,
-        contentScore: result.scores.categories.find((c) => c.key === "content")?.score ?? 0,
-        socialScore: result.scores.categories.find((c) => c.key === "social")?.score ?? 0,
-        structuredScore: result.scores.categories.find((c) => c.key === "structured")?.score ?? 0,
-        mobileScore: result.scores.categories.find((c) => c.key === "mobile")?.score ?? 0,
-        performanceScore: result.scores.categories.find((c) => c.key === "performance")?.score ?? 0,
-        aiReadinessScore: result.scores.categories.find((c) => c.key === "aiReadiness")?.score ?? 0,
-        pagesAudited: result.pages.length,
-        criticalCount: result.scores.critical,
-        warningCount: result.scores.warning,
-        infoCount: result.scores.info,
-        durationMs: result.durationMs,
-        result: JSON.stringify(result),
-      },
-    });
+    // Persist history when possible. On platforms with an ephemeral
+    // filesystem (e.g. serverless + SQLite in /tmp) the write can fail —
+    // the audit itself must still succeed, so degrade gracefully.
+    let auditId: string | null = null;
+    try {
+      const record = await db.seoAudit.create({
+        data: {
+          domain: result.domain,
+          startUrl: result.startUrl,
+          overallScore: result.scores.overall,
+          grade: result.scores.grade,
+          technicalScore: result.scores.categories.find((c) => c.key === "technical")?.score ?? 0,
+          contentScore: result.scores.categories.find((c) => c.key === "content")?.score ?? 0,
+          socialScore: result.scores.categories.find((c) => c.key === "social")?.score ?? 0,
+          structuredScore: result.scores.categories.find((c) => c.key === "structured")?.score ?? 0,
+          mobileScore: result.scores.categories.find((c) => c.key === "mobile")?.score ?? 0,
+          performanceScore: result.scores.categories.find((c) => c.key === "performance")?.score ?? 0,
+          aiReadinessScore: result.scores.categories.find((c) => c.key === "aiReadiness")?.score ?? 0,
+          pagesAudited: result.pages.length,
+          criticalCount: result.scores.critical,
+          warningCount: result.scores.warning,
+          infoCount: result.scores.info,
+          durationMs: result.durationMs,
+          result: JSON.stringify(result),
+        },
+      });
+      auditId = record.id;
+    } catch (dbErr) {
+      console.error("audit history save failed (continuing):", dbErr);
+    }
 
     return NextResponse.json(
-      { id: record.id, result },
+      { id: auditId, result },
       { headers: { "Cache-Control": "no-store, max-age=0" } },
     );
   } catch (err) {

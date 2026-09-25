@@ -1,6 +1,6 @@
 # SEO Autopilot — 100% SEO for Any Website
 
-> Crawl any website → 48-check audit → weighted scoring → **AI-generated fixes** → track scores over time.
+> Crawl any website → 58-check strict audit → honest scoring with hard caps → **AI-generated fixes** → track scores over time.
 
 An open-source, self-hostable SEO platform built on the principles of [OpenSEO](https://github.com/every-app/open-seo) (open-source Semrush/Ahrefs alternative) — extended with an AI autopilot layer that doesn't just *report* SEO problems, but **writes the fixes for you**.
 
@@ -8,7 +8,7 @@ An open-source, self-hostable SEO platform built on the principles of [OpenSEO](
 
 ```
 ┌─────────┐   ┌──────────────┐   ┌──────────┐   ┌───────────────┐   ┌──────────┐
-│  Crawl  │ → │ 48 SEO checks │ → │  Scoring  │ → │ AI-generated  │ → │  Track   │
+│  Crawl  │ → │ 58 SEO checks │ → │  Scoring  │ → │ AI-generated  │ → │  Track   │
 │ BFS bot │   │  7 categories │   │ A+ … F    │   │ fixes & briefs│   │ over time│
 └─────────┘   └──────────────┘   └──────────┘   └───────────────┘   └──────────┘
 ```
@@ -16,7 +16,7 @@ An open-source, self-hostable SEO platform built on the principles of [OpenSEO](
 ### 1. Live Crawl
 BFS crawler with redirect-chain tracking, bot-challenge detection, per-page timing, 12s timeouts and a 55s crawl budget.
 
-### 2. 48-Check Audit — 7 Categories
+### 2. 58-Check Audit — 7 Categories
 
 | Category | Sample checks |
 |---|---|
@@ -28,7 +28,7 @@ BFS crawler with redirect-chain tracking, bot-challenge detection, per-page timi
 | **Performance** (10%) | TTFB, HTML size, DOM size |
 | **AI Search Readiness** (10%) | llms.txt, AI-bot blocking in robots.txt (GPTBot/ClaudeBot/PerplexityBot) |
 
-Scores are severity-weighted (critical 12 / warning 5 / info 1.5) with page-count damping, rolled up into an overall 0–100 score and letter grade.
+Scores are strictly weighted (critical 22 / warning 9 / info 3) with **hard caps**: a missing homepage title caps the score at 50, a noindex page at 25, HTTP-only at 45, and 2+/4+/7+ unique critical issues at 70/55/40 — so sites with real problems get real numbers, never inflated A-grades.
 
 ### 3. AI Autopilot (z-ai SDK, server-side)
 - **Optimized Titles & Metas** — rewritten per page with rationale
@@ -67,7 +67,7 @@ Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · shadcn/ui · Prisma +
 
 ## Relationship to OpenSEO
 
-The issue registry and audit philosophy are modeled on [every-app/open-seo](https://github.com/every-app/open-seo)'s site-audit engine (28 issue types), expanded here to 48 checks and combined with AI fix generation, content strategy and score tracking. Use OpenSEO when you need DataForSEO-powered keyword/rank/backlink data; use SEO Autopilot when you want a free, instant, self-hosted audit-and-fix loop for sites you control.
+The issue registry and audit philosophy are modeled on [every-app/open-seo](https://github.com/every-app/open-seo)'s site-audit engine (28 issue types), expanded here to 58 checks and combined with AI fix generation, content strategy and score tracking. Use OpenSEO when you need DataForSEO-powered keyword/rank/backlink data; use SEO Autopilot when you want a free, instant, self-hosted audit-and-fix loop for sites you control.
 
 ## License
 
